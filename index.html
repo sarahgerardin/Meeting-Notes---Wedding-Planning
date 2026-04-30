@@ -282,7 +282,7 @@
 <div class="container">
 
   <h1>WEDDING PLANNING — MEETING NOTES</h1>
-  <p class="subtitle">Données sauvegardées automatiquement dans le navigateur.</p>
+  <p class="subtitle">Data saved automatically in your browser.</p>
 
   <!-- Client / Date -->
   <div class="meeting-header">
@@ -295,7 +295,7 @@
     <div class="section-head">📋 Topics to discuss</div>
     <div class="topic-list" id="topic-list"></div>
     <div class="add-row">
-      <input id="topic-input" placeholder="Ajouter un sujet…" onkeydown="if(event.key==='Enter')addTopic()" />
+      <input id="topic-input" placeholder="Add a topic…" onkeydown="if(event.key==='Enter')addTopic()" />
       <button onclick="addTopic()">+</button>
     </div>
   </div>
@@ -303,7 +303,7 @@
   <!-- 2. NOTES -->
   <div class="section">
     <div class="section-head">📝 Notes</div>
-    <textarea class="notes-area" id="notes" placeholder="Notes libres…" oninput="save()"></textarea>
+    <textarea class="notes-area" id="notes" placeholder="Free notes…" oninput="save()"></textarea>
   </div>
 
   <!-- 3. TO-DOS -->
@@ -311,22 +311,22 @@
     <div class="section">
       <div class="section-head">
         ✅ Mes to-dos
-        <button class="clear-btn" onclick="clearDone('my')">Effacer cochés</button>
+        <button class="clear-btn" onclick="clearDone('my')">Clear done</button>
       </div>
       <div class="todo-list" id="my-list"></div>
       <div class="add-row">
-        <input id="my-input" placeholder="Ajouter…" onkeydown="if(event.key==='Enter')addTodo('my')" />
+        <input id="my-input" placeholder="Add…" onkeydown="if(event.key==='Enter')addTodo('my')" />
         <button onclick="addTodo('my')">+</button>
       </div>
     </div>
     <div class="section">
       <div class="section-head">
-        💑 To-dos du couple
-        <button class="clear-btn" onclick="clearDone('couple')">Effacer cochés</button>
+        💑 Couple's to-dos
+        <button class="clear-btn" onclick="clearDone('couple')">Clear done</button>
       </div>
       <div class="todo-list" id="couple-list"></div>
       <div class="add-row">
-        <input id="couple-input" placeholder="Ajouter…" onkeydown="if(event.key==='Enter')addTodo('couple')" />
+        <input id="couple-input" placeholder="Add…" onkeydown="if(event.key==='Enter')addTodo('couple')" />
         <button onclick="addTodo('couple')">+</button>
       </div>
     </div>
@@ -334,23 +334,23 @@
 
   <!-- 4. NEXT MEETING -->
   <div class="section">
-    <div class="section-head">📅 Prochaine réunion</div>
+    <div class="section-head">📅 Next meeting</div>
     <div class="next-meeting-body">
       <div>
-        <div class="field-label">Date &amp; heure</div>
+        <div class="field-label">Date &amp; time</div>
         <input id="next-date" type="datetime-local" oninput="save()" />
       </div>
       <div>
-        <div class="field-label">Sujets à aborder</div>
-        <textarea id="next-topics" placeholder="Sujets pour la prochaine réunion…" oninput="save()"></textarea>
+        <div class="field-label">Topics to cover</div>
+        <textarea id="next-topics" placeholder="Topics for next meeting…" oninput="save()"></textarea>
       </div>
     </div>
   </div>
 
   <!-- Bottom actions -->
   <div class="bottom-bar">
-    <button class="copy-btn" onclick="copyAll()">Copier le résumé</button>
-    <button class="reset-btn" onclick="resetAll()">Nouvelle réunion</button>
+    <button class="copy-btn" onclick="copyAll()">Copy summary</button>
+    <button class="reset-btn" onclick="resetAll()">New meeting</button>
     <span class="toast" id="toast">Copié !</span>
   </div>
 
@@ -398,7 +398,7 @@ function renderTopics() {
   const list = document.getElementById('topic-list');
   list.innerHTML = '';
   if (!state.topics.length) {
-    list.innerHTML = '<p class="empty-msg">Aucun sujet pour l\'instant</p>';
+    list.innerHTML = '<p class="empty-msg">No topics yet</p>';
     return;
   }
   state.topics.forEach((item, i) => {
@@ -437,7 +437,7 @@ function renderTodo(side) {
   const list = document.getElementById(side + '-list');
   list.innerHTML = '';
   if (!state[side].length) {
-    list.innerHTML = '<p class="empty-msg">Aucun to-do</p>';
+    list.innerHTML = '<p class="empty-msg">No to-dos yet</p>';
     return;
   }
   state[side].forEach((item, i) => {
@@ -479,25 +479,50 @@ function clearDone(side) {
 function copyAll() {
   const client = document.getElementById('client').value || '—';
   const date = document.getElementById('meeting-date').value || '—';
-  let txt = 'RÉUNION – ' + client + ' – ' + date + '\n\n';
+  const line = '─────────────────────────────────';
+
+  let txt = 'MEETING NOTES — ' + client.toUpperCase() + '\n';
+  txt += 'Date: ' + date + '\n';
+  txt += line + '\n\n';
 
   txt += '📋 TOPICS TO DISCUSS\n';
-  state.topics.length ? state.topics.forEach(x => { txt += '  ' + (x.done ? '[✓]' : '[ ]') + ' ' + x.text + '\n'; }) : (txt += '  (aucun)\n');
+  if (state.topics.length) {
+    state.topics.forEach(x => {
+      const mark = x.done ? '☑' : '☐';
+      const label = x.done ? x.text.split('').join('\u0336') + '\u0336' : x.text;
+      txt += '  ' + mark + '  ' + label + '\n';
+    });
+  } else { txt += '  (none)\n'; }
 
-  txt += '\n📝 NOTES\n';
-  txt += (document.getElementById('notes').value || '  (aucune)') + '\n';
+  txt += '\n' + line + '\n';
+  txt += '📝 NOTES\n';
+  txt += (document.getElementById('notes').value.trim() || '  (none)') + '\n';
 
-  txt += '\n✅ MES TO-DOS\n';
-  state.my.length ? state.my.forEach(x => { txt += '  ' + (x.done ? '[✓]' : '[ ]') + ' ' + x.text + '\n'; }) : (txt += '  (aucun)\n');
+  txt += '\n' + line + '\n';
+  txt += '✅ MY TO-DOS\n';
+  if (state.my.length) {
+    state.my.forEach(x => {
+      const mark = x.done ? '☑' : '☐';
+      const label = x.done ? x.text.split('').join('\u0336') + '\u0336' : x.text;
+      txt += '  ' + mark + '  ' + label + '\n';
+    });
+  } else { txt += '  (none)\n'; }
 
-  txt += '\n💑 TO-DOS DU COUPLE\n';
-  state.couple.length ? state.couple.forEach(x => { txt += '  ' + (x.done ? '[✓]' : '[ ]') + ' ' + x.text + '\n'; }) : (txt += '  (aucun)\n');
+  txt += '\n💑 COUPLE\'S TO-DOS\n';
+  if (state.couple.length) {
+    state.couple.forEach(x => {
+      const mark = x.done ? '☑' : '☐';
+      const label = x.done ? x.text.split('').join('\u0336') + '\u0336' : x.text;
+      txt += '  ' + mark + '  ' + label + '\n';
+    });
+  } else { txt += '  (none)\n'; }
 
   const nd = document.getElementById('next-date').value;
-  const nt = document.getElementById('next-topics').value;
-  txt += '\n📅 PROCHAINE RÉUNION\n';
-  txt += '  Date : ' + (nd || '—') + '\n';
-  txt += '  Sujets : ' + (nt || '—') + '\n';
+  const nt = document.getElementById('next-topics').value.trim();
+  txt += '\n' + line + '\n';
+  txt += '📅 NEXT MEETING\n';
+  txt += '  Date & time: ' + (nd || '—') + '\n';
+  txt += '  Topics: ' + (nt || '—') + '\n';
 
   navigator.clipboard.writeText(txt).then(() => {
     const t = document.getElementById('toast');
@@ -508,7 +533,7 @@ function copyAll() {
 
 /* ── reset ── */
 function resetAll() {
-  if (!confirm('Commencer une nouvelle réunion ? Les données actuelles seront effacées.')) return;
+  if (!confirm('Start a new meeting? Current data will be cleared.')) return;
   state = { topics: [], my: [], couple: [] };
   ['client','meeting-date','notes','next-date','next-topics'].forEach(id => { document.getElementById(id).value = ''; });
   renderTopics(); renderTodo('my'); renderTodo('couple'); save();
